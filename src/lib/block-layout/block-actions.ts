@@ -62,7 +62,7 @@ export function createBlockActions() {
       const offsetLeft = getDomNodeLeftOffset(blockDomNode)
       const { left, top } = blockDomNode.getBoundingClientRect()
 
-      ctx.domNode.style.top = top - 2 + 'px'
+      ctx.domNode.style.top = top + window.scrollY - 2 + 'px'
       ctx.domNode.style.left = left - offsetLeft - 25 + 'px'
 
       this.show({ blockDomNode, posOfBlockNode, blockNode })
