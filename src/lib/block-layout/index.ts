@@ -67,7 +67,7 @@ const BlockLayout = Extension.create({
   },
 
   addProseMirrorPlugins() {
-    return [BlockLayoutPlugin(this)]
+    return this.editor.isEditable ? [BlockLayoutPlugin(this)] : []
   },
 })
 

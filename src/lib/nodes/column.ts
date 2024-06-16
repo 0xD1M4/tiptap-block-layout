@@ -23,6 +23,8 @@ export const Column = Node.create({
   // https://github.com/ueberdosis/tiptap/issues/361
   addNodeView() {
     return ({ editor, getPos, HTMLAttributes }) => {
+      if (editor.isEditable === false) return {}
+
       const dom = document.createElement('div')
       dom.dataset.type = 'column'
       dom.setAttribute('style', HTMLAttributes.style || '')

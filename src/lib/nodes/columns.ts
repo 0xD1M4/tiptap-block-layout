@@ -20,6 +20,8 @@ export const Columns = Node.create({
   addKeyboardShortcuts() {
     return {
       Backspace: ({ editor }) => {
+        if (editor.isEditable === false) return false
+
         const { state, dispatch } = editor.view
         const { schema, tr } = state
 
