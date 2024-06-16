@@ -5,6 +5,7 @@ import type { createDroparea } from './droparea.js'
 import type { createDragHandle } from './drag-handle.js'
 
 import { adjustColumnSizes } from '$lib/nodes/columns.js'
+import { findWrapping } from '@tiptap/pm/transform'
 
 type TDropCtx = ReturnType<typeof createDroparea>['ctx']
 type TDragCtx = ReturnType<typeof createDragHandle>['ctx']
@@ -74,6 +75,11 @@ export function createDropController(dragCtx: TDragCtx, dropCtx: TDropCtx) {
       const parentColumnNode = view.state.doc.nodeAt(posOfParentColumnNode)
       if (!parentColumnNode || parentColumnNode.childCount > 1) return false
 
+      // TODO: Correctly unwrap column when list was dragged
+      if (parentColumnNode.firstChild?.type.name.includes('List')) {
+        return false
+      }
+
       droppedColumn = {
         columnNode: parentColumnNode,
         posOfColumnNode: posOfParentColumnNode,
@@ -89,8 +95,15 @@ export function createDropController(dragCtx: TDragCtx, dropCtx: TDropCtx) {
 
       const { schema, selection, tr } = view.state
 
+      const dragParentNode = selection.$anchor.parent
+      let dragNode = dragParentNode.nodeAt(selection.$anchor.parentOffset)!
+
+      if (dragNode.type.name === 'listItem') {
+        dragNode = dragParentNode.type.createAndFill({ ...dragParentNode.attrs }, dragNode)!
+      }
+
       // const cutContent = tr.doc.cut(selection.from, selection.to)
-      const content = [selection.$anchor.parent.nodeAt(selection.$anchor.parentOffset)!]
+      const content = [dragNode]
       // const cutContent = tr.doc.cut(selection.from, selection.to)
       // const newColumnNode = schema.nodes.column.createAndFill(null, cutContent.content)
       const newColumnNode = schema.nodes.column.createAndFill(null, content)
@@ -134,8 +147,15 @@ export function createDropController(dragCtx: TDragCtx, dropCtx: TDropCtx) {
 
       const { schema, selection, tr } = view.state
 
+      const dragParentNode = selection.$anchor.parent
+      let dragNode = dragParentNode.nodeAt(selection.$anchor.parentOffset)!
+
+      if (dragNode.type.name === 'listItem') {
+        dragNode = dragParentNode.type.createAndFill({ ...dragParentNode.attrs }, dragNode)!
+      }
+
       // TODO: Handle drops from inside columns
-      const newColumnNode = schema.nodes.column.createAndFill(null, view.state.selection.node)
+      const newColumnNode = schema.nodes.column.createAndFill(null, dragNode)
       if (newColumnNode) tr.insert(pos + columnNode.nodeSize, newColumnNode)
 
       if (dragCtx.dragging) this.handleColumnDrop(view, dragCtx.dragging)

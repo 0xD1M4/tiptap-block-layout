@@ -32,9 +32,10 @@ new Editor({
 
 ## TODO
 
-[x] Global block controls (incl. drag handler)
-[x] Block's drop zone
-[x] Columns resizing
-[x] Creating columns by dropping blocks on left/right side and in-between columns
-[ ] Support sublist item's drop on the column
-[ ] BUG: Column drop on itself results in column deletion
+- [x] Global block controls (incl. drag handler)
+- [x] Block's drop zone
+- [x] Columns resizing
+- [x] Creating columns by dropping blocks on left/right side and in-between columns
+- [x] Support sublist item's drop on the column
+- [x] BUG: Column drop on itself results in column deletion
+- [ ] TODO: Correctly unwrap list when dragged out of column

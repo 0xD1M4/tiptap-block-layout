@@ -33,11 +33,15 @@ export function createDropareaBlock(dropareaWidth = 5) {
       return this.getBlockDroparea({ pos, node, domNode }, e.clientY)
     },
     getBlockDroparea(block: { pos: number; node: Node; domNode: HTMLElement }, mouseY: number) {
-      const { pos, node, domNode } = block
+      let { pos, node, domNode } = block
       const { right, left, top, bottom } = domNode.getBoundingClientRect()
       const isTopHalf = mouseY < (top + bottom) / 2
 
       const leftOffset = node.type.name === 'listItem' ? getDomNodeLeftOffset(domNode) : 0
+
+      if (node.type.name === 'column') {
+        pos += isTopHalf ? 1 : -1
+      }
 
       return {
         node,

@@ -5,9 +5,11 @@ import { createBlockActions } from './block-actions.js'
 import { createDroparea } from './droparea.js'
 import { createDropController } from './drop-controller.js'
 
-function BlockLayoutPlugin({ editor }: { editor: Editor }) {
+type TOptions = Partial<{ dropareaColor: string }>
+
+function BlockLayoutPlugin({ editor, options }: { editor: Editor; options?: TOptions }) {
   const BlockActions = createBlockActions()
-  const Droparea = createDroparea()
+  const Droparea = createDroparea(options?.dropareaColor)
   const DragHandle = createDragHandle(editor, BlockActions)
   const DropController = createDropController(DragHandle.ctx, Droparea.ctx)
 
@@ -59,7 +61,7 @@ function BlockLayoutPlugin({ editor }: { editor: Editor }) {
   })
 }
 
-const BlockLayout = Extension.create({
+const BlockLayout = Extension.create<TOptions, any>({
   name: 'BlockLayout',
 
   addOptions() {

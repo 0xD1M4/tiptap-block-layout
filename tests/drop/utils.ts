@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 type TData = {
   from: string
   to: string
+  yOffset?: number
   position?:
     | 'out-left'
     | 'out-right'
@@ -12,6 +13,8 @@ type TData = {
     | 'above'
     | 'below'
     | 'between-after-left'
+    | 'exact-above'
+    | 'exact-below'
 }
 
 async function moveMouseToPosition(
@@ -41,6 +44,12 @@ async function moveMouseToPosition(
 
     case 'below':
       return await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2 + 2)
+
+    case 'exact-above':
+      return await page.mouse.move(rect.x + 10, rect.y)
+
+    case 'exact-below':
+      return await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height)
 
     default:
       return await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2)
