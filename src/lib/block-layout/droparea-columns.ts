@@ -2,7 +2,8 @@ import type { EditorView } from '@tiptap/pm/view'
 
 type TRect = { top: number; left: number; width: number; height: number }
 
-export function createDropareaColumns(dropareaWidth = 3) {
+export function createDropareaColumns() {
+  const dropareaWidth = 3
   const dropareaHalfWidth = dropareaWidth / 2
 
   return {

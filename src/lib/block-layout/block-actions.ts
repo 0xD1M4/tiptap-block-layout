@@ -1,6 +1,8 @@
 import type { Node } from '@tiptap/pm/model'
 import type { EditorView } from '@tiptap/pm/view'
 
+import { getDomNodeLeftOffset } from './utils.js'
+
 export function createBlockActions() {
   const ctx = {
     domNode: null,
@@ -68,15 +70,6 @@ export function createBlockActions() {
       this.show({ blockDomNode, posOfBlockNode, blockNode })
     },
   }
-}
-
-function getDomNodeLeftOffset(domNode: HTMLElement): number {
-  const listDomNode = domNode.closest('ol') || domNode.closest('ul')
-  if (!listDomNode) return 0
-
-  const { paddingLeft, marginLeft } = window.getComputedStyle(listDomNode)
-
-  return parseFloat(paddingLeft) + parseFloat(marginLeft)
 }
 
 function findHoveredBlockNode(

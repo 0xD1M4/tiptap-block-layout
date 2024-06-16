@@ -1,4 +1,5 @@
 import type { EditorView } from '@tiptap/pm/view'
+import type { Node } from '@tiptap/pm/model'
 import { createDropareaColumns } from './droparea-columns.js'
 import { createDropareaBlock } from './droparea-block.js'
 
@@ -11,18 +12,26 @@ type TBetweenColumns = {
   leftColumnDomNode: Element
 }
 
-export function createDroparea() {
-  const dropareaWidth = 3
-  const color = '#000000'
+type TBlock = {
+  node: Node
+  domNode: HTMLElement
+  pos: number
+}
+
+const DEFAULT_CTX = { sideColumn: null, betweenColumns: null, block: null } as {
+  sideColumn: null | TSideColumn
+  betweenColumns: null | TBetweenColumns
+  block: null | TBlock
+}
+
+export function createDroparea(color = '#000000') {
+  const dropareaWidth = 5
 
   let domNode = null as null | HTMLElement
 
   const DropareaBlock = createDropareaBlock(dropareaWidth)
-  const DropareaColumns = createDropareaColumns(dropareaWidth)
-  const ctx = {
-    sideColumn: null as null | TSideColumn,
-    betweenColumns: null as null | TBetweenColumns,
-  }
+  const DropareaColumns = createDropareaColumns()
+  const ctx = { ...DEFAULT_CTX }
 
   return {
     ctx,
@@ -63,27 +72,33 @@ export function createDroparea() {
       this.hide()
     },
 
+    applyCtx<GCtxKey extends keyof typeof ctx>(key: GCtxKey, value: (typeof ctx)[GCtxKey]) {
+      Object.assign(ctx, DEFAULT_CTX, { [key]: value })
+    },
+
     onDocumentDragOver(view: EditorView, e: DragEvent) {
       if (view.editable === false) return
 
       const sideColumn = DropareaColumns.handleSideColumnDrag(view, e)
       if (sideColumn) {
-        ctx.sideColumn = sideColumn
+        this.applyCtx('sideColumn', sideColumn)
         return this.drawRect(sideColumn.rect)
       }
       ctx.sideColumn = null
 
       const betweenColumns = DropareaColumns.handleBetweenColumnsDrag(e)
       if (betweenColumns) {
-        ctx.betweenColumns = betweenColumns
+        this.applyCtx('betweenColumns', betweenColumns)
         return this.drawRect(betweenColumns.rect)
       }
       ctx.betweenColumns = null
 
       const block = DropareaBlock.handleBlockDrag(view, e)
       if (block) {
+        this.applyCtx('block', block)
         return this.drawRect(block.rect)
       }
+      ctx.block = null
 
       return this.hide()
     },

@@ -1,6 +1,6 @@
 import type { EditorView } from '@tiptap/pm/view'
-import type { EditorState, Transaction } from 'prosemirror-state'
-import type { Node } from '@tiptap/pm/model'
+import { NodeSelection, TextSelection, type EditorState, type Transaction } from 'prosemirror-state'
+import type { Node, ResolvedPos } from '@tiptap/pm/model'
 import type { createDroparea } from './droparea.js'
 import type { createDragHandle } from './drag-handle.js'
 
@@ -19,12 +19,12 @@ export function createDropController(dragCtx: TDragCtx, dropCtx: TDropCtx) {
     onDocumentDrop(view: EditorView, e: DragEvent) {
       let shouldPreventDefault = false
 
-      if (dropCtx.sideColumn) {
+      if (dropCtx.block) {
+        shouldPreventDefault = this.handleBlockDrop(view, dropCtx.block, e)
+      } else if (dropCtx.sideColumn) {
         shouldPreventDefault = this.handleSideColumnDrop(view, dropCtx.sideColumn)
       } else if (dropCtx.betweenColumns) {
         shouldPreventDefault = this.handleBetweenColumnsDrop(view, dropCtx.betweenColumns)
-      } else if (dragCtx.dragging) {
-        shouldPreventDefault = this.handleColumnDrop(view, dragCtx.dragging)
       }
 
       if (shouldPreventDefault) e.preventDefault()
@@ -146,5 +146,77 @@ export function createDropController(dragCtx: TDragCtx, dropCtx: TDropCtx) {
 
       return true
     },
+
+    // https://github.com/ProseMirror/prosemirror-view/blob/d3e9dcabe253707654978a9da9be9b9ce78db38d/src/input.ts#L699
+    handleBlockDrop(view: EditorView, data: NonNullable<TDropCtx['block']>, e: DragEvent): boolean {
+      if (data.node === dragCtx.dragging?.blockNode) {
+        return true
+      }
+
+      let dragging = view.dragging
+      view.dragging = null
+
+      let slice = dragging && dragging.slice
+
+      if (!slice) return false
+      if (!e.dataTransfer) return false
+
+      const move = true
+
+      const tr = view.state.tr
+      const insertPos = data.pos
+
+      if (move) {
+        const { node } = dragging as any
+        if (node) node.replace(tr)
+        else tr.deleteSelection()
+      }
+
+      const pos = tr.mapping.map(data.pos)
+      const isNode = slice.openStart == 0 && slice.openEnd == 0 && slice.content.childCount == 1
+      const beforeInsert = tr.doc
+
+      if (isNode) tr.replaceRangeWith(pos, pos, slice.content.firstChild!)
+      else tr.replaceRange(pos, pos, slice)
+
+      if (tr.doc.eq(beforeInsert)) {
+        if (dragCtx.dragging) this.handleColumnDrop(view, dragCtx.dragging)
+        return true
+      }
+
+      const $pos = tr.doc.resolve(pos)
+      if (
+        isNode &&
+        NodeSelection.isSelectable(slice.content.firstChild!) &&
+        $pos.nodeAfter?.sameMarkup(slice.content.firstChild!)
+      ) {
+        tr.setSelection(new NodeSelection($pos))
+      } else {
+        let end = tr.mapping.map(insertPos)
+        tr.mapping.maps[tr.mapping.maps.length - 1].forEach((_from, _to, _newFrom, newTo) => {
+          end = newTo
+        })
+        tr.setSelection(selectionBetween(view, $pos, tr.doc.resolve(end)))
+      }
+
+      if (dragCtx.dragging) this.handleColumnDrop(view, dragCtx.dragging)
+
+      view.focus()
+      view.dispatch(tr.setMeta('uiEvent', 'drop'))
+
+      return true
+    },
   }
+}
+
+function selectionBetween(
+  view: EditorView,
+  $anchor: ResolvedPos,
+  $head: ResolvedPos,
+  bias?: number,
+) {
+  return (
+    view.someProp('createSelectionBetween', (f) => f(view, $anchor, $head)) ||
+    TextSelection.between($anchor, $head, bias)
+  )
 }

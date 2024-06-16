@@ -1,72 +1,57 @@
 import type { EditorView } from '@tiptap/pm/view'
 import type { Node } from '@tiptap/pm/model'
-import { dropPoint } from '@tiptap/pm/transform'
+import { getDomNodeLeftOffset } from './utils.js'
 
 type TRect = { top: number; left: number; width: number; height: number }
 
-export function createDropareaBlock(dropareaWidth = 3) {
+export function createDropareaBlock(dropareaWidth = 5) {
   const dropareaHalfWidth = dropareaWidth / 2
 
   return {
-    handleBlockDrag(view: EditorView, e: DragEvent): undefined | { pos: number; rect: TRect } {
+    handleBlockDrag(
+      view: EditorView,
+      e: DragEvent,
+    ): undefined | { pos: number; node: Node; domNode: HTMLElement; rect: TRect } {
       const $pos = view.posAtCoords({ top: e.clientY, left: e.clientX })
       if (!$pos) return
 
-      if ($pos.inside === -1 && $pos.pos === 0) {
-        $pos.inside = 0
+      let domNode = (
+        $pos.inside === -1 ? view.dom : view.nodeDOM($pos.inside)
+      ) as null | HTMLElement
+
+      if (domNode === view.dom) {
+        domNode = ($pos.pos <= 0 ? domNode.firstChild : domNode.lastChild) as null | HTMLElement
       }
 
-      const node = $pos.inside >= 0 && view.state.doc.nodeAt($pos.inside)
-      if (!node) return
-
-      const isDisabled = checkIsDropCursorDisabled(view, e, node, $pos)
-      if (isDisabled) return
-
-      let { pos } = $pos
-      if (view.dragging?.slice) {
-        const point = dropPoint(view.state.doc, pos, view.dragging.slice)
-        if (point !== null) pos = point
-      }
-
-      const rect = this.getBlockDroparea(view, pos)
-
-      return rect && { pos, rect }
-    },
-
-    getBlockDroparea(view: EditorView, pos: number): undefined | TRect {
-      const $pos = view.state.doc.resolve(pos)
-
-      // Processing only block nodes
-      if ($pos.parent.inlineContent) return
-
-      const { nodeBefore, nodeAfter } = $pos
-      if (!nodeAfter && !nodeBefore) return
-
-      const domNode = view.nodeDOM(pos - (nodeBefore?.nodeSize ?? 0))
       if (!domNode) return
 
-      const rect = (domNode as HTMLElement).getBoundingClientRect()
+      const pos = view.posAtDOM(domNode, 0) - 1
+      const node = view.state.doc.nodeAt(pos)
+
+      if (!node) return
+
+      return this.getBlockDroparea({ pos, node, domNode }, e.clientY)
+    },
+    getBlockDroparea(block: { pos: number; node: Node; domNode: HTMLElement }, mouseY: number) {
+      const { pos, node, domNode } = block
+      const { right, left, top, bottom } = domNode.getBoundingClientRect()
+      const isTopHalf = mouseY < (top + bottom) / 2
+
+      const leftOffset = node.type.name === 'listItem' ? getDomNodeLeftOffset(domNode) : 0
 
       return {
-        left: rect.left,
-        top: (nodeBefore ? rect.bottom : rect.top) - dropareaHalfWidth,
-        width: rect.right - rect.left,
-        height: dropareaHalfWidth,
+        node,
+        domNode,
+
+        pos: isTopHalf ? pos : pos + node.nodeSize,
+
+        rect: {
+          left: left - leftOffset,
+          top: (isTopHalf ? top : bottom) - dropareaHalfWidth,
+          width: right - left + leftOffset,
+          height: dropareaHalfWidth,
+        },
       }
     },
   }
-}
-
-function checkIsDropCursorDisabled(
-  view: EditorView,
-  e: DragEvent,
-
-  node: Node,
-  $pos: ReturnType<EditorView['posAtCoords']>,
-) {
-  const disableDropCursor = node.type.spec.disableDropCursor
-
-  return typeof disableDropCursor === 'function'
-    ? disableDropCursor(view, $pos, e)
-    : disableDropCursor
 }
