@@ -4,6 +4,7 @@ type TData = {
   from: string
   to: string
   yOffset?: number
+  xOffset?: number
   position?:
     | 'out-left'
     | 'out-right'
@@ -46,7 +47,7 @@ async function moveMouseToPosition(
       return await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2 + 2)
 
     case 'exact-above':
-      return await page.mouse.move(rect.x + 10, rect.y)
+      return await page.mouse.move(rect.x + 10 + (data.xOffset ?? 0), rect.y + 0.5)
 
     case 'exact-below':
       return await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height)

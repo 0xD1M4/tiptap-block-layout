@@ -98,9 +98,10 @@ export function createDropareaColumns() {
       const listDomNode = node.closest('.tiptap > ol, .tiptap > ul') as null | HTMLElement
       if (listDomNode) {
         node = listDomNode
-      } else if (node.dataset.type === 'column') {
-        node = node.parentElement!
       }
+
+      const columnsNode = node.closest('[data-type="columns"]') as null | HTMLElement
+      if (columnsNode) node = columnsNode
 
       // if (BlockActions.ctx.hovered?.blockDomNode === node) {
       if (node.classList.contains('ProseMirror-selectednode')) {

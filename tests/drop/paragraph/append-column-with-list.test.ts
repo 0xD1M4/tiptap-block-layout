@@ -13,6 +13,7 @@ test.describe('Drop - Append column with only ordered list', () => {
         from: 'Paragraph 1',
         to: 'Column list item 1',
         position: 'exact-above',
+        xOffset: -15,
       })
 
       await expectDiffHtml(page, [

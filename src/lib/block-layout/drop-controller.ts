@@ -5,7 +5,6 @@ import type { createDroparea } from './droparea.js'
 import type { createDragHandle } from './drag-handle.js'
 
 import { adjustColumnSizes } from '$lib/nodes/columns.js'
-import { findWrapping } from '@tiptap/pm/transform'
 
 type TDropCtx = ReturnType<typeof createDroparea>['ctx']
 type TDragCtx = ReturnType<typeof createDragHandle>['ctx']
@@ -55,7 +54,10 @@ export function createDropController(dragCtx: TDragCtx, dropCtx: TDropCtx) {
 
           tr = nextState.tr
             .delete(posOfColumnsNode, posOfColumnsNode + columnsNode.nodeSize)
-            .insert(posOfColumnsNode - 1, columnsNode.child(Math.abs(1 - pos$.index())).content)
+            .insert(
+              posOfColumnsNode > 0 ? posOfColumnsNode - 1 : posOfColumnsNode,
+              columnsNode.child(Math.abs(1 - pos$.index())).content,
+            )
         }
 
         droppedColumn = null

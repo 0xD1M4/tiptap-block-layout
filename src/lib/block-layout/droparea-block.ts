@@ -26,9 +26,13 @@ export function createDropareaBlock(dropareaWidth = 5) {
       if (!domNode) return
 
       const pos = view.posAtDOM(domNode, 0) - 1
-      const node = view.state.doc.nodeAt(pos)
+      if (pos < 0) return
 
+      const node = view.state.doc.nodeAt(pos)
       if (!node) return
+
+      const domAtPos = view.domAtPos(pos + 1)
+      if (domAtPos.node) domNode = domAtPos.node as HTMLElement
 
       return this.getBlockDroparea({ pos, node, domNode }, e.clientY)
     },

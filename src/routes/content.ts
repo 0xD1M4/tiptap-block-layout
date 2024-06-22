@@ -106,3 +106,17 @@ export const OL_COLUMN_CONTENT = `
   </li>
 </ol>
 `
+
+export const COLUMNS_FIRST_CONTENT = `
+<div data-type="columns">
+  <div data-type="column"><p>Column 1</p></div>
+  <div data-type="column"><p>Column 2</p></div>
+</div>
+<p>Paragraph 1</p>
+`
+
+export const INLINE_CONTENT = `
+<p>Paragraph 1</p>
+<p>Paragraph 2<span data-type="inline-node" data-id="0"></span><span data-type="inline-node" data-id="1"></span></p>
+<p><span data-type="inline-node" data-id="2"></span>Paragraph 3</p>
+`

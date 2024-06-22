@@ -1,9 +1,10 @@
 import { Editor, Extension } from '@tiptap/core'
-import { Plugin } from '@tiptap/pm/state'
+import { Plugin, Transaction } from '@tiptap/pm/state'
 import { createDragHandle } from './drag-handle.js'
 import { createBlockActions } from './block-actions.js'
 import { createDroparea } from './droparea.js'
 import { createDropController } from './drop-controller.js'
+import { createInlineNodeCursor } from './inline-node-cursor.js'
 
 type TOptions = Partial<{ dropareaColor: string }>
 
@@ -12,6 +13,7 @@ function BlockLayoutPlugin({ editor, options }: { editor: Editor; options?: TOpt
   const Droparea = createDroparea(options?.dropareaColor)
   const DragHandle = createDragHandle(editor, BlockActions)
   const DropController = createDropController(DragHandle.ctx, Droparea.ctx)
+  const InlineNodeCursor = createInlineNodeCursor()
 
   return new Plugin({
     view: (view) => {
@@ -28,9 +30,12 @@ function BlockLayoutPlugin({ editor, options }: { editor: Editor; options?: TOpt
       }
     },
     appendTransaction(transactions, prevState, nextState) {
-      let appended = null
+      let appended = null as null | Transaction
 
       appended = DropController.appendTransaction(transactions, prevState, nextState)
+      if (appended) return appended
+
+      appended = InlineNodeCursor.appendTransaction(transactions, prevState, nextState)
       if (appended) return appended
 
       return null
@@ -41,8 +46,10 @@ function BlockLayoutPlugin({ editor, options }: { editor: Editor; options?: TOpt
           BlockActions.onDocumentMouseMove(view, e)
         },
 
-        keydown() {
+        keydown(view, e) {
           BlockActions.hide()
+
+          InlineNodeCursor.onDocumentKeyDown(e)
         },
 
         dragover(view, e) {

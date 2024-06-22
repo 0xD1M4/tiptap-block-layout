@@ -39,3 +39,5 @@ new Editor({
 - [x] Support sublist item's drop on the column
 - [x] BUG: Column drop on itself results in column deletion
 - [ ] TODO: Correctly unwrap list when dragged out of column
+- [ ] TODO: Write tests for inline node views zero width joiner
+- [ ] TODO: Write tests when columns node is first in a document

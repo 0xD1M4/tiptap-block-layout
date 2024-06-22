@@ -66,8 +66,8 @@ devDependencies:
     specifier: ^3.8.1
     version: 3.8.1(postcss@8.4.38)(svelte@5.0.0-next.164)
   tiptap-svelte-adapter:
-    specifier: ^0.0.2
-    version: 0.0.2(@tiptap/core@2.4.0)(@tiptap/extension-bubble-menu@2.4.0)(@tiptap/pm@2.4.0)(svelte@5.0.0-next.164)
+    specifier: ^0.0.3
+    version: 0.0.3(@tiptap/core@2.4.0)(@tiptap/extension-bubble-menu@2.4.0)(@tiptap/pm@2.4.0)(svelte@5.0.0-next.164)
   tslib:
     specifier: ^2.6.3
     version: 2.6.3
@@ -2748,8 +2748,8 @@ packages:
       '@popperjs/core': 2.11.8
     dev: true
 
-  /tiptap-svelte-adapter@0.0.2(@tiptap/core@2.4.0)(@tiptap/extension-bubble-menu@2.4.0)(@tiptap/pm@2.4.0)(svelte@5.0.0-next.164):
-    resolution: {integrity: sha512-0yj5f3t0M0bKeX3GKB4YNl/46nebedUAYVIImGyVLZnzpUiuh7khfU02MdQAXhfmm1mLFv9hsgai+BPER2Ffcw==}
+  /tiptap-svelte-adapter@0.0.3(@tiptap/core@2.4.0)(@tiptap/extension-bubble-menu@2.4.0)(@tiptap/pm@2.4.0)(svelte@5.0.0-next.164):
+    resolution: {integrity: sha512-dRKHPIqxSD0d9eMOhG+/LQp3TFLkKpCGzBLuxEu/JQRxrWgZAHLHXVzu7hKd85/UoQhZUr+u5TKJx6o0L/GVNg==}
     peerDependencies:
       '@tiptap/core': ^2.4.0
       '@tiptap/extension-bubble-menu': ^2.4.0

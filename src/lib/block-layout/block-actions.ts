@@ -20,7 +20,7 @@ export function createBlockActions() {
     ctx,
     init(view: EditorView) {
       ctx.domNode = document.createElement('div')
-      ctx.domNode.classList.add('global-drag-actions', 'hide')
+      ctx.domNode.classList.add('global-drag-actions', 'hidden')
 
       view?.dom?.parentElement?.appendChild(ctx.domNode)
 
@@ -37,18 +37,18 @@ export function createBlockActions() {
     },
     hide() {
       ctx.hovered = null
-      ctx.domNode?.classList.add('hide')
+      ctx.domNode?.classList.add('hidden')
     },
     show(hovered: NonNullable<(typeof ctx)['hovered']>) {
       ctx.hovered = hovered
-      ctx.domNode?.classList.remove('hide')
+      ctx.domNode?.classList.remove('hidden')
     },
 
     onDocumentMouseMove(view: EditorView, event: MouseEvent) {
       if (!view.editable) return
       if (!ctx.domNode) return
 
-      let targetPos = view.posAtCoords({ top: event.clientY, left: event.clientX + 50 })?.inside
+      const targetPos = view.posAtCoords({ top: event.clientY, left: event.clientX + 50 })?.inside
       if (typeof targetPos !== 'number' || targetPos < 0) {
         return this.hide()
       }
@@ -93,14 +93,18 @@ function findHoveredBlockNode(
 
   if (!blockNode) return
 
-  if (
-    blockNode &&
-    (blockNode.type.name === 'orderedList' || blockNode.type.name === 'unorderedList')
-  ) {
+  if (blockNode.type.name === 'orderedList' || blockNode.type.name === 'unorderedList') {
     return
   }
 
-  if (posOfBlockNode > 0 && blockNode) {
+  if (blockNode.type.name.includes('column')) {
+    const isColumnsNode = blockNode.type.name === 'columns'
+
+    posOfBlockNode += isColumnsNode ? 2 : 1
+    blockNode = view.state.doc.nodeAt(posOfBlockNode)!
+  }
+
+  if (posOfBlockNode > 0) {
     const parentPos = posOfBlockNode - 1
     const parentBlockNode = view.state.doc.nodeAt(parentPos)
 

@@ -59,7 +59,7 @@
     "publint": "^0.1.9",
     "svelte": "5.0.0-next.164",
     "svelte-check": "^3.8.1",
-    "tiptap-svelte-adapter": "^0.0.2",
+    "tiptap-svelte-adapter": "^0.0.3",
     "tslib": "^2.6.3",
     "typescript": "^5.5.2",
     "typescript-eslint": "^7.13.1",

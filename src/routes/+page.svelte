@@ -2,7 +2,9 @@
   import StarterKit from '@tiptap/starter-kit'
   import Editor from 'tiptap-svelte-adapter'
   import BlockLayout, { Columns, Column } from '$lib/index.js'
+
   import { CONTENT } from './content.js'
+  import InlineNode from './inline-node.js'
 
   const content = new URLSearchParams(location.search).get('content') || CONTENT
 
@@ -29,6 +31,7 @@
         Columns,
         Column,
         BlockLayout,
+        InlineNode,
       ],
 
       content,
@@ -45,7 +48,7 @@
       margin: 0;
     }
 
-    .hide {
+    .hidden {
       display: none;
     }
   }
@@ -119,6 +122,13 @@
       &:hover {
         opacity: 1;
       }
+    }
+
+    [data-type='inline-node'] {
+      display: inline-flex;
+      border: 1px solid blue;
+      padding: 3px;
+      margin: 0 2px;
     }
   }
 </style>

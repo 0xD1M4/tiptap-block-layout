@@ -46,12 +46,14 @@ export function createDroparea(color = '#000000') {
       this.hide()
       view?.dom?.parentElement?.appendChild(domNode)
 
-      const onScroll = () => this.hide()
-      window.addEventListener('scroll', onScroll)
+      const hide = () => this.hide()
+      window.addEventListener('scroll', hide)
+      window.addEventListener('dragend', hide)
 
       return {
         destroy: () => {
-          window.removeEventListener('scroll', onScroll)
+          window.removeEventListener('scroll', hide)
+          window.removeEventListener('dragend', hide)
           domNode?.remove?.()
           domNode = null
         },
@@ -62,10 +64,10 @@ export function createDroparea(color = '#000000') {
       ctx.betweenColumns = null
       ctx.sideColumn = null
 
-      domNode?.classList.add('hide')
+      domNode?.classList.add('hidden')
     },
     show() {
-      domNode?.classList.remove('hide')
+      domNode?.classList.remove('hidden')
     },
 
     onDocumentDrop() {
