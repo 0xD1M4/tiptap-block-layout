@@ -4,14 +4,16 @@ import { getDomNodeLeftOffset } from './utils.js'
 
 type TRect = { top: number; left: number; width: number; height: number }
 
+type TDropBlock = { pos: number; node: Node; domNode: HTMLElement; rect: TRect }
+
 export function createDropareaBlock(dropareaWidth = 5) {
   const dropareaHalfWidth = dropareaWidth / 2
 
   return {
-    handleBlockDrag(
-      view: EditorView,
-      e: DragEvent,
-    ): undefined | { pos: number; node: Node; domNode: HTMLElement; rect: TRect } {
+    handleBlockDrag(view: EditorView, e: DragEvent): undefined | TDropBlock {
+      const bottomColumnsBlock = this.handleBottomColumnsDrag(view, e)
+      if (bottomColumnsBlock) return bottomColumnsBlock
+
       const $pos = view.posAtCoords({ top: e.clientY, left: e.clientX })
       if (!$pos) return
 
@@ -25,14 +27,15 @@ export function createDropareaBlock(dropareaWidth = 5) {
 
       if (!domNode) return
 
-      const pos = view.posAtDOM(domNode, 0) - 1
+      let pos = $pos.pos === 0 ? 0 : view.posAtDOM(domNode, 0)
       if (pos < 0) return
 
-      const node = view.state.doc.nodeAt(pos)
-      if (!node) return
+      let node = view.state.doc.nodeAt(pos)
+      if (!node || node.isBlock === false) {
+        node = pos > 0 ? view.state.doc.nodeAt(--pos) : null
+      }
 
-      const domAtPos = view.domAtPos(pos + 1)
-      if (domAtPos.node) domNode = domAtPos.node as HTMLElement
+      if (!node) return
 
       return this.getBlockDroparea({ pos, node, domNode }, e.clientY)
     },
@@ -60,6 +63,32 @@ export function createDropareaBlock(dropareaWidth = 5) {
           height: dropareaHalfWidth,
         },
       }
+    },
+
+    handleBottomColumnsDrag(view: EditorView, e: DragEvent): undefined | TDropBlock {
+      const target = e.target as null | HTMLElement
+      const columnsNode = target?.closest('[data-type="columns"]') as null | HTMLElement
+      if (!columnsNode) return
+
+      const { bottom } = columnsNode.getBoundingClientRect()
+      if (e.clientY < bottom - 3 || e.clientY > bottom + 4) return
+
+      let pos = view.posAtDOM(columnsNode, 0)
+      if (pos < 0) return
+
+      let node = view.state.doc.nodeAt(pos)
+
+      if (node?.type.name === 'columns') {
+        pos += 1
+      } else if (pos > 0 && node?.type.name === 'column') {
+        node = view.state.doc.nodeAt(pos - 1)
+      } else {
+        return
+      }
+
+      if (!node) return
+
+      return this.getBlockDroparea({ pos, node, domNode: columnsNode }, e.clientY)
     },
   }
 }

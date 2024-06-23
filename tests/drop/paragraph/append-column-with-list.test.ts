@@ -13,7 +13,7 @@ test.describe('Drop - Append column with only ordered list', () => {
         from: 'Paragraph 1',
         to: 'Column list item 1',
         position: 'exact-above',
-        xOffset: -15,
+        xOffset: -35,
       })
 
       await expectDiffHtml(page, [
@@ -43,6 +43,8 @@ test.describe('Drop - Append column with only ordered list', () => {
         from: 'Paragraph 1',
         to: 'Column list item 1',
         position: 'exact-below',
+        yOffset: -3,
+        xOffset: -35,
       })
 
       await expectDiffHtml(page, [
@@ -100,6 +102,7 @@ test.describe('Drop - Append column with only ordered list', () => {
         from: 'Paragraph 2',
         to: 'Column 2',
         position: 'exact-below',
+        yOffset: -5,
       })
 
       await expectDiffHtml(page, [

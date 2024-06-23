@@ -97,9 +97,8 @@ function findHoveredBlockNode(
     return
   }
 
-  if (blockNode.type.name.includes('column')) {
-    const isColumnsNode = blockNode.type.name === 'columns'
-
+  const isColumnsNode = blockNode.type.name === 'columns'
+  if (isColumnsNode || blockNode.type.name === 'column') {
     posOfBlockNode += isColumnsNode ? 2 : 1
     blockNode = view.state.doc.nodeAt(posOfBlockNode)!
   }
