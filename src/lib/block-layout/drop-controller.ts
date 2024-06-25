@@ -90,9 +90,20 @@ export function createDropController(dragCtx: TDragCtx, dropCtx: TDropCtx) {
       return false
     },
 
+    getDropOnBlockNodePosition(view: EditorView, dropTargetDomNode: Element) {
+      const pos = view.posAtDOM(dropTargetDomNode, 0)
+      const node = view.state.doc.nodeAt(pos)
+
+      if (!node) return -1
+
+      if (node.type.name === 'column') return pos - 1
+      if (node.type.name === 'listItem') return pos - 1
+
+      return node.isBlock ? pos : pos - 1
+    },
+
     handleSideColumnDrop(view: EditorView, data: NonNullable<TDropCtx['sideColumn']>): boolean {
-      // NOTE: Offseting to parent position
-      let posOfDropTarget = view.posAtDOM(data.dropTargetDomNode, 0) - 1
+      let posOfDropTarget = this.getDropOnBlockNodePosition(view, data.dropTargetDomNode)
       if (posOfDropTarget < 0) return false
 
       const { schema, selection, tr } = view.state
